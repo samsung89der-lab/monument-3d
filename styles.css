@@ -61,6 +61,17 @@ body { background: var(--bg); color: var(--ink); font: 15px/1.5 "Segoe UI", syst
 .chips button b { display: block; font-size: 13.5px; }
 .chips button small { display: block; font-size: 11.5px; color: var(--ink-soft); }
 .chips button.on { border-color: var(--gold); box-shadow: inset 0 0 0 1px var(--gold); background: #3a3325; }
+/* плитки формы стелы: сетка, силуэт над подписью. Силуэт рисуется из того
+   же контура, что и камень в 3D, — картинок здесь нет. */
+.silgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(94px, 1fr)); gap: 8px; }
+.silgrid button { min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; padding: 10px 6px 9px; }
+.sil { width: 36px; height: 46px; display: block; }
+.sil path { fill: #474d55; stroke: #98a0a9; stroke-width: 1.1; }
+.silgrid button.on .sil path { fill: #6a5730; stroke: var(--gold); }
+/* подсказка формы показываем только у выбранной — иначе панель из 10 плиток
+   растягивается на весь экран */
+.silgrid button small { display: none; font-size: 10.5px; line-height: 1.25; }
+.silgrid button.on small { display: block; }
 .stones { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 8px; }
 .stones button { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; color: var(--ink); text-align: left; padding: 9px; cursor: pointer; }
 .stones button b { display: block; font-size: 13px; }

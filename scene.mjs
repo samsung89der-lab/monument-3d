@@ -617,6 +617,13 @@ function faceSize(state, G) {
   if (f === "fig") return { w: G.stela.w * 0.78, h: G.stela.h * 0.56, cy: G.stela.h * 0.28 };
   if (f === "cap") return { w: G.stela.w * 0.84, h: G.stela.h * 0.78, cy: G.stela.h * 0.40 };
   if (f === "ark") return { w: G.stela.w * 0.78, h: G.stela.h * 0.78, cy: G.stela.h * 0.40 };
+  /* новые контуры: прямоугольник гравировки берём с запасом, чтобы буквы
+     не залезли на плечи, стрелку, дуги облака или вырез сердца */
+  if (f === "plechi") return { w: G.stela.w * 0.86, h: G.stela.h * 0.56, cy: G.stela.h * 0.31 };
+  if (f === "volna") return { w: G.stela.w * 0.84, h: G.stela.h * 0.62, cy: G.stela.h * 0.34 };
+  if (f === "strelna") return { w: G.stela.w * 0.60, h: G.stela.h * 0.44, cy: G.stela.h * 0.25 };
+  if (f === "oblako") return { w: G.stela.w * 0.72, h: G.stela.h * 0.54, cy: G.stela.h * 0.30 };
+  if (f === "serdce") return { w: G.stela.w * 0.66, h: G.stela.h * 0.40, cy: G.stela.h * 0.24 };
   return { w: G.stela.w * 0.96, h: G.stela.h * 0.96, cy: G.stela.h * 0.49 };
 }
 function wrapEngr(g, txt, x, y, size, maxW) {
@@ -638,7 +645,7 @@ function rr(g, x, y, w, h, r) {
   g.lineTo(x, y + r); g.quadraticCurveTo(x, y, x + r, y);
   g.closePath();
 }
-/*裁切 по пропорциям холста, чтобы лицо не сплющивалось*/
+/* обрезка по пропорциям холста, чтобы лицо на фото не сплющивалось */
 function cropFit(img, w, h) {
   const sc = Math.max(w / img.naturalWidth, h / img.naturalHeight);
   const cw = w / sc, ch = h / sc;
@@ -651,34 +658,102 @@ function cropFit(img, w, h) {
 /* ------------------------------------------------------------ */
 /*  Стела: контур в X/Y, толщина по Z, фаска по периметру.     */
 /* ------------------------------------------------------------ */
-function stelaShape(form, w, h) {
-  const s = new THREE.Shape(), hw = w / 2, ch = Math.min(hw * 0.5, 0.05);
+/* Контуры стелы — один список команд и для 3D, и для силуэта в окне выбора.
+   Команды: M — начать, L — прямая, Q — дуга через одну точку, C — дуга через
+   две, Z — замкнуть. Координаты в метрах: x от -hw до hw, y от 0 (низ стелы)
+   до h (верх). Держим все точки внутри прямоугольника w × h, иначе стела
+   окажется шире или выше заявленного размера. */
+function outlineOf(form, w, h) {
+  const hw = w / 2, ch = Math.min(hw * 0.5, 0.05), k = hw * 0.5523;
+
   if (form === "ark") {
-    s.moveTo(-hw, 0); s.lineTo(-hw, h - hw);
-    s.absarc(0, h - hw, hw, Math.PI, 0, true);
-    s.lineTo(hw, 0); s.lineTo(-hw, 0);
-  } else if (form === "cap") {
-    s.moveTo(-hw, 0); s.lineTo(-hw, h * 0.55);
-    s.bezierCurveTo(-hw, h * 0.86, -hw * 0.45, h, 0, h);
-    s.bezierCurveTo(hw * 0.45, h, hw, h * 0.86, hw, h * 0.55);
-    s.lineTo(hw, 0); s.lineTo(-hw, 0);
-  } else if (form === "krest") {
-    s.moveTo(-hw, 0); s.lineTo(-hw, h * 0.72);
-    s.lineTo(-hw * 0.34, h * 0.72); s.lineTo(-hw * 0.34, h * 0.90);
-    s.lineTo(-hw * 0.66, h * 0.90); s.lineTo(-hw * 0.66, h);
-    s.lineTo(hw * 0.66, h); s.lineTo(hw * 0.66, h * 0.90);
-    s.lineTo(hw * 0.34, h * 0.90); s.lineTo(hw * 0.34, h * 0.72);
-    s.lineTo(hw, h * 0.72); s.lineTo(hw, 0); s.lineTo(-hw, 0);
-  } else if (form === "fig") {
-    s.moveTo(-hw, 0); s.lineTo(-hw, h * 0.62);
-    s.bezierCurveTo(-hw * 1.02, h * 0.82, -hw * 0.35, h * 0.88, 0, h);
-    s.bezierCurveTo(hw * 0.40, h * 0.90, hw, h * 0.80, hw, h * 0.60);
-    s.lineTo(hw, 0); s.lineTo(-hw, 0);
-  } else {
-    s.moveTo(-hw, 0); s.lineTo(-hw, h - ch); s.lineTo(-hw + ch, h);
-    s.lineTo(hw - ch, h); s.lineTo(hw, h - ch); s.lineTo(hw, 0); s.lineTo(-hw, 0);
+    return [["M", -hw, 0], ["L", -hw, h - hw],
+      ["C", -hw, h - hw + k, -k, h, 0, h],
+      ["C", k, h, hw, h - hw + k, hw, h - hw],
+      ["L", hw, 0], ["Z"]];
   }
+  if (form === "cap") {
+    return [["M", -hw, 0], ["L", -hw, h * 0.55],
+      ["C", -hw, h * 0.86, -hw * 0.45, h, 0, h],
+      ["C", hw * 0.45, h, hw, h * 0.86, hw, h * 0.55],
+      ["L", hw, 0], ["Z"]];
+  }
+  if (form === "krest") {
+    return [["M", -hw, 0], ["L", -hw, h * 0.72],
+      ["L", -hw * 0.34, h * 0.72], ["L", -hw * 0.34, h * 0.90],
+      ["L", -hw * 0.66, h * 0.90], ["L", -hw * 0.66, h],
+      ["L", hw * 0.66, h], ["L", hw * 0.66, h * 0.90],
+      ["L", hw * 0.34, h * 0.90], ["L", hw * 0.34, h * 0.72],
+      ["L", hw, h * 0.72], ["L", hw, 0], ["Z"]];
+  }
+  if (form === "fig") {
+    return [["M", -hw, 0], ["L", -hw, h * 0.62],
+      ["C", -hw * 1.02, h * 0.82, -hw * 0.35, h * 0.88, 0, h],
+      ["C", hw * 0.40, h * 0.90, hw, h * 0.80, hw, h * 0.60],
+      ["L", hw, 0], ["Z"]];
+  }
+  if (form === "plechi") {
+    const nw = hw * 0.70, ch2 = Math.min(nw * 0.5, 0.04);
+    return [["M", -hw, 0], ["L", -hw, h * 0.58], ["L", -nw, h * 0.74],
+      ["L", -nw, h - ch2], ["L", -nw + ch2, h], ["L", nw - ch2, h],
+      ["L", nw, h - ch2], ["L", nw, h * 0.74], ["L", hw, h * 0.58],
+      ["L", hw, 0], ["Z"]];
+  }
+  if (form === "volna") {
+    /* верх идёт волной: слева опускается, справа поднимается до верхнего
+       края — перепад заметен и на плитке, и на камне */
+    return [["M", -hw, 0], ["L", -hw, h * 0.72],
+      ["C", -hw * 0.66, h * 0.94, -hw * 0.40, h * 0.66, 0, h * 0.80],
+      ["C", hw * 0.40, h * 0.94, hw * 0.66, h * 0.86, hw, h],
+      ["L", hw, 0], ["Z"]];
+  }
+  if (form === "strelna") {
+    /* бока почти прямые, наверх сходятся в острую стрелку */
+    return [["M", -hw, 0], ["L", -hw, h * 0.46],
+      ["C", -hw * 0.99, h * 0.72, -hw * 0.42, h * 0.95, 0, h],
+      ["C", hw * 0.42, h * 0.95, hw * 0.99, h * 0.72, hw, h * 0.46],
+      ["L", hw, 0], ["Z"]];
+  }
+  if (form === "oblako") {
+    /* три дуги сверху, средняя выше всех — силуэт читается даже мелким */
+    return [["M", -hw, 0], ["L", -hw, h * 0.56],
+      ["Q", -hw, h * 0.92, -hw * 0.62, h * 0.90],
+      ["Q", -hw * 0.66, h * 0.64, -hw * 0.32, h * 0.72],
+      ["Q", -hw * 0.24, h * 1.00, 0, h * 0.98],
+      ["Q", hw * 0.30, h * 0.70, hw * 0.56, h * 0.80],
+      ["Q", hw * 0.94, h * 0.98, hw, h * 0.58],
+      ["L", hw, 0], ["Z"]];
+  }
+  if (form === "serdce") {
+    /* две верхние дуги и заметный вырез посередине */
+    return [["M", -hw, 0], ["L", -hw, h * 0.42],
+      ["C", -hw, h * 0.80, -hw * 0.74, h, -hw * 0.24, h * 0.88],
+      ["Q", 0, h * 0.66, hw * 0.24, h * 0.88],
+      ["C", hw * 0.74, h, hw, h * 0.80, hw, h * 0.42],
+      ["L", hw, 0], ["Z"]];
+  }
+  /* Прямая и всё неизвестное: прямоугольник со снятыми углами. */
+  return [["M", -hw, 0], ["L", -hw, h - ch], ["L", -hw + ch, h],
+    ["L", hw - ch, h], ["L", hw, h - ch], ["L", hw, 0], ["Z"]];
+}
+
+function stelaShape(form, w, h) {
+  const s = new THREE.Shape();
+  outlineOf(form, w, h).forEach((c) => {
+    if (c[0] === "M") s.moveTo(c[1], c[2]);
+    else if (c[0] === "L") s.lineTo(c[1], c[2]);
+    else if (c[0] === "Q") s.quadraticCurveTo(c[1], c[2], c[3], c[4]);
+    else if (c[0] === "C") s.bezierCurveTo(c[1], c[2], c[3], c[4], c[5], c[6]);
+    else s.closePath();
+  });
   return s;
+}
+
+/* Контур формы для окна выбора: те же команды, что идут в 3D, чтобы
+   силуэт в плитке выбора и камень на модели совпадали. */
+export function formOutline(form) {
+  const w = 0.60, h = 0.85;
+  return { w: w, h: h, cmds: outlineOf(form || "pryam", w, h) };
 }
 function box(w, h, d, mat) {
   const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
@@ -692,7 +767,7 @@ function cyl(r1, r2, h, mat, seg) {
 }
 
 /* ------------------------------------------------------------ */
-/*  Сборка模型: памятник + участок. Всё по размерам из geo().   */
+/*  Сборка модели: памятник + участок. Всё по размерам из geo().   */
 /* ------------------------------------------------------------ */
 function build(cfg, state, faceTex, FZ, G) {
   G = G || window.ENGINE.geo(cfg, state);

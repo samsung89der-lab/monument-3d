@@ -3,7 +3,7 @@
    Ничего не считает сам: за размеры отвечает engine.js, за
    картинку — scene.mjs. Здесь только состояние и обвязка.
    ============================================================ */
-import { create, stoneSwatch } from "./scene.mjs?v=5";
+import { create, stoneSwatch, formOutline } from "./scene.mjs?v=8";
 
 const CFG = window.MON_CFG;
 const E = window.ENGINE;
@@ -71,16 +71,37 @@ let view = null;
 const dirty = { size: false, plot: false };      // чем правил клиент, то и показываем в chips
 
 /* ---------------- chips-переключатели ---------------- */
+/* Силуэт формы: контур берём из того же списка команд, что идёт в 3D,
+   поэтому рисунок в плитке и камень на модели совпадают. */
+function silSvg(form) {
+  if (!form) return "";
+  const o = formOutline(form);
+  const W = 44, H = 54, pad = 4;
+  const sc = Math.min((W - pad * 2) / o.w, (H - pad * 2) / o.h);
+  const dx = (W - o.w * sc) / 2, dy = H - pad;
+  const X = (x) => (dx + (x + o.w / 2) * sc).toFixed(1);
+  const Y = (y) => (dy - y * sc).toFixed(1);
+  let d = "";
+  o.cmds.forEach((c) => {
+    if (c[0] === "M") d += "M" + X(c[1]) + " " + Y(c[2]);
+    else if (c[0] === "L") d += "L" + X(c[1]) + " " + Y(c[2]);
+    else if (c[0] === "Q") d += "Q" + X(c[1]) + " " + Y(c[2]) + " " + X(c[3]) + " " + Y(c[4]);
+    else if (c[0] === "C") d += "C" + X(c[1]) + " " + Y(c[2]) + " " + X(c[3]) + " " + Y(c[4]) + " " + X(c[5]) + " " + Y(c[6]);
+    else d += "Z";
+  });
+  return '<svg class="sil" viewBox="0 0 ' + W + " " + H + '" aria-hidden="true"><path d="' + d + '"/></svg>';
+}
 function chipSet(host, items, getVal, setVal) {
   host.innerHTML = "";
   items.forEach((it) => {
     const b = document.createElement("button");
     b.type = "button";
     b.dataset.id = it.id;
+    b.className = it.sil ? "has-sil" : "";
     b.innerHTML = (it.swatch
       ? '<span class="sw" style="--c1:' + it.swatch[0] + ";--c2:" + it.swatch[1] + ";--c3:" + it.swatch[2]
         + (it.thumb ? ";background-image:url(" + it.thumb + ")" : "") + '"></span>'
-      : "") + "<b>" + it.name + "</b>" + (it.hint ? "<small>" + it.hint + "</small>" : "");
+      : "") + silSvg(it.sil) + "<b>" + it.name + "</b>" + (it.hint ? "<small>" + it.hint + "</small>" : "");
     b.addEventListener("click", () => { setVal(it.id); S = E.sanitize(S, CFG); render(); });
     host.appendChild(b);
   });
@@ -92,6 +113,8 @@ function mark(host) {
 function pick(host, val) { host.dataset.val = val; mark(host); }
 
 chipSet(els.presetChips, CFG.presets, null, (id) => { S = E.applyPreset(S, id, CFG); });
+/* у форм рисуем силуэт: id формы — это id контура в scene.mjs */
+CFG.forms.forEach((f) => { f.sil = f.id; });
 chipSet(els.formChips, CFG.forms, null, (id) => { S.stela.form = id; });
 chipSet(els.sizeChips, CFG.sizes, null, (id) => {
   const sz = E.find(CFG.sizes, id);
