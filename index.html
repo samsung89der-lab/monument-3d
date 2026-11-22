@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>3D-конструктор памятника — форма, камень, гравировка, участок</title>
+<meta name="description" content="Соберите памятник в 3D: форма стелы, размер, камень, тумба, гравировка и портрет, цветник, покрытие и ограда участка. Состав работ виден сразу.">
+<link rel="stylesheet" href="styles.css?v=2">
+</head>
+<body>
+
+<header class="top">
+  <div class="top-in wrap">
+    <div class="brand"><b id="brandName">Мастерская памятников</b><span id="brandGeo"></span></div>
+    <div class="top-act">
+      <span class="ribbon" id="demoRibbon" hidden>ДЕМО · цены условные</span>
+      <a class="btn btn-ghost btn-sm" id="phoneBtn" href="#">Позвонить</a>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <div class="lead-line">
+    <h1 id="heroTitle">Соберите памятник и увидите смету сразу</h1>
+    <p class="hint">Форма стелы, размер, камень, тумба, гравировка с портретом, цветник, покрытие и
+      ограда участка. Модель можно вращать: то, что вы выбираете слева, сразу видно на камне.</p>
+  </div>
+
+  <div class="board">
+
+    <!-- СЦЕНА -->
+    <section class="stage">
+      <div class="stage-tools">
+        <div class="seg" id="viewSeg">
+          <button data-view="3/4" class="on">В три четверти</button>
+          <button data-view="front">Спереди</button>
+          <button data-view="top">Сверху</button>
+          <button data-view="back">Сзади</button>
+        </div>
+        <div class="seg" id="bgSeg">
+          <button data-bg="uchastok" class="on">Участок</button>
+          <button data-bg="studio">Студия</button>
+          <button data-bg="sky">Вечер</button>
+        </div>
+        <button class="btn btn-ghost btn-sm" id="pngBtn" type="button">Скачать PNG</button>
+      </div>
+      <div class="stage-canvas" id="stage"></div>
+      <p class="stage-info" id="infoLine"></p>
+      <p class="hint stage-hint">Колесо мыши — приблизить, свайп — повернуть</p>
+
+      <div class="card total-card">
+        <h3 data-price>Смета <span class="hint">позиции меняются, как только вы что-то выбираете</span></h3>
+        <div class="price-list" id="priceList" data-price></div>
+        <div class="total-line" data-price><span id="totalLabel">Итого</span><b id="totalSum">0 Br</b></div>
+        <div class="inst" id="instLine" data-price></div>
+        <div class="row row-cta">
+          <button class="btn btn-primary" id="sendBtn" type="button">Отправить проект</button>
+          <button class="btn" id="copyBtn" type="button">Скопировать смету</button>
+          <button class="btn btn-ghost" id="linkBtn" type="button">Ссылка на проект</button>
+        </div>
+        <div class="err" id="formErr"></div>
+        <div class="share" id="shareBox" hidden></div>
+        <p class="hint" id="priceNote" data-price></p>
+      </div>
+    </section>
+
+    <!-- ФОРМА -->
+    <aside class="panel">
+      <nav class="tabs" id="tabs">
+        <button data-tab="mon" class="on">Памятник</button>
+        <button data-tab="engr">Надпись</button>
+        <button data-tab="cvet">Цветник</button>
+        <button data-tab="plot">Участок</button>
+      </nav>
+
+      <section id="tab-mon" class="tab">
+        <div class="card">
+          <h3>Готовые сцены <span class="hint">выбрать основу, детали поправить ниже</span></h3>
+          <div class="chips" id="presetChips"></div>
+        </div>
+        <div class="card">
+          <h3>Форма стелы</h3>
+          <div class="chips" id="formChips"></div>
+        </div>
+        <div class="card">
+          <h3>Размер стелы <span class="hint">ширина × высота, см</span></h3>
+          <div class="chips" id="sizeChips"></div>
+          <div class="row">
+            <label class="field"><span>Ширина, см</span><input id="sw" type="number" step="5" min="30" max="180"></label>
+            <label class="field"><span>Высота, см</span><input id="sh" type="number" step="5" min="40" max="240"></label>
+            <label class="field"><span>Толщина, см</span><input id="sth" type="number" step="1" min="4" max="25"></label>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Камень</h3>
+          <div class="stones" id="stoneChips"></div>
+        </div>
+        <div class="card">
+          <h3>Обработка боков</h3>
+          <div class="chips" id="sidesChips"></div>
+        </div>
+        <div class="card">
+          <h3>Постамент</h3>
+          <div class="chips" id="tumbaChips"></div>
+        </div>
+      </section>
+
+      <section id="tab-engr" class="tab" hidden>
+        <div class="card">
+          <h3>Гравировка</h3>
+          <label class="field"><span>ФИО</span><input id="efio" type="text" maxlength="60" placeholder="ИВАН ПЕТРОВ"></label>
+          <label class="field"><span>Даты жизни</span><input id="eyears" type="text" maxlength="40" placeholder="1954 — 2021"></label>
+          <label class="field"><span>Эпитафия <span class="hint">необязательно</span></span>
+            <input id="eepitaph" type="text" maxlength="90" placeholder="Светлая память"></label>
+          <label class="field scale"><span>Размер надписи <b id="tkVal">100%</b></span>
+            <input id="tkScale" type="range" min="60" max="150" step="5" value="100"></label>
+          <p class="hint">Крупнее — читается с дальнего конца дорожки, мельче — аккуратнее. Буквы не выйдут за край камня: площадка под гравировку задана контуром стелы.</p>
+          <p class="hint" data-price>Стоимость гравировки считается по буквам: правите ФИО — смета меняется тут же.</p>
+        </div>
+        <div class="card">
+          <h3>Узоры <span class="hint">поверх камня, вместе с текстом и портретом</span></h3>
+          <div class="switches" id="uzList"></div>
+          <label class="field scale"><span>Размер узоров <b id="uzVal">100%</b></span>
+            <input id="uzScale" type="range" min="60" max="150" step="5" value="100"></label>
+          <p class="hint">Узор — отдельный слой, поэтому его можно сложить с чем угодно: лавровые ветви по бокам, лента под датами, ваза внизу, резная рамка по краю. <span data-price>Каждый узор в смете считается своей строкой.</span></p>
+          <p class="hint">Крест и рамка раньше стояли отдельными галочками под текстом — теперь они в
+            этом же списке, цены те же. «Лучи за крестом» работают вместе с крестом: если лучи включены,
+            а креста нет, крест нарисуется сам. Любой узор, как и буквы с портретом, можно сдвинуть,
+            повернуть и изменить в размере — карточка «Что двигать на камне» ниже.</p>
+        </div>
+        <div class="card">
+          <h3>Что двигать на камне <span class="hint">нажмите на элемент</span></h3>
+          <div class="chips" id="tfChips"></div>
+          <p class="hint" id="tfNow"></p>
+          <label class="field"><span>Вбок <b id="tfDxVal">0 см</b> <span class="hint">минус — левее</span></span>
+            <input id="tfDx" type="range" min="-30" max="30" step="1" value="0"></label>
+          <label class="field"><span>Выше-ниже <b id="tfDyVal">0 см</b> <span class="hint">минус — ниже</span></span>
+            <input id="tfDy" type="range" min="-40" max="40" step="1" value="0"></label>
+          <label class="field scale"><span>Повернуть <b id="tfRotVal">0°</b></span>
+            <input id="tfRot" type="range" min="-45" max="45" step="1" value="0"></label>
+          <label class="field scale"><span>Размер <b id="tfScVal">100%</b></span>
+            <input id="tfSc" type="range" min="50" max="200" step="5" value="100"></label>
+          <div class="row"><button class="ghost sm" id="tfReset">Вернуть как было</button></div>
+          <p class="hint">Двигать и крутить можно всё: ФИО, даты, эпитафию, портрет и любой узор.
+            Расстояния здесь в сантиметрах камня, поворот в градусах. На цену эти движения
+            не влияют: цена зависит от состава, а не от того, куда лёг рисунок.</p>
+        </div>
+        <div class="card">
+          <h3>Портрет</h3>
+          <div class="chips" id="photoChips"></div>
+          <label class="field scale"><span>Размер портрета <b id="ftVal">100%</b></span>
+            <input id="ftScale" type="range" min="60" max="150" step="5" value="100"></label>
+          <input id="photoFile" type="file" accept="image/png,image/jpeg,image/webp">
+          <p class="hint" id="photoHint">Фото остаётся у вас в браузере: в ссылку на проект оно не входит.</p>
+          <div class="row"><button class="btn btn-ghost" id="photoClear" type="button">Убрать фото</button></div>
+        </div>
+      </section>
+
+      <!-- вкладка «Цветник»: сам цветник и всё, что ставится вокруг стелы -->
+      <section id="tab-cvet" class="tab" hidden>
+        <div class="card">
+          <h3>Цветник</h3>
+          <div class="chips" id="cvetChips"></div>
+        </div>
+        <div class="card">
+          <h3>Ваза, столик, лавка</h3>
+          <div class="switches" id="extrasList"></div>
+        </div>
+      </section>
+
+      <section id="tab-plot" class="tab" hidden>
+        <div class="card">
+          <h3>Размер участка <span class="hint">вдоль дорожки × в глубину</span></h3>
+          <div class="chips" id="plotChips"></div>
+          <div class="row">
+            <label class="field"><span>Вдоль дорожки, см</span><input id="pw" type="number" step="10" min="70" max="400"></label>
+            <label class="field"><span>В глубину, см</span><input id="pd" type="number" step="5" min="60" max="300"></label>
+          </div>
+          <div class="note" id="plotNote"></div>
+        </div>
+        <div class="card">
+          <h3>Покрытие участка</h3>
+          <div class="chips" id="coverChips"></div>
+        </div>
+        <div class="card">
+          <h3>Ограда</h3>
+          <div class="chips" id="fenceChips"></div>
+        </div>
+      </section>
+
+      <div class="card form-card">
+        <h3>Кому прислать проект</h3>
+        <div class="row">
+          <label class="field"><span>Имя</span><input id="cname" type="text" autocomplete="name" placeholder="Как к вам обращаться"></label>
+          <label class="field"><span>Телефон</span><input id="cphone" type="tel" autocomplete="tel" placeholder="+375 __ ___ __ __"></label>
+        </div>
+        <label class="field"><span>Комментарий</span>
+          <textarea id="ccomment" rows="3" placeholder="Где участок, что уже стоит, какие сроки"></textarea></label>
+        <label class="switch"><input type="checkbox" id="cagree"> <span id="agreeText"></span></label>
+      </div>
+
+      <ul class="terms" id="termsList"></ul>
+    </aside>
+  </div>
+
+  <footer class="foot">
+    <p id="disclaimer"></p>
+  </footer>
+</main>
+
+<script src="config.js?v=2"></script>
+<script src="engine.js?v=2"></script>
+<script type="importmap">{ "imports": { "three": "./vendor/three.module.min.js" } }</script>
+<script type="module" src="app.js?v=2"></script>
+</body>
+</html>
