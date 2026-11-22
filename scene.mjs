@@ -114,6 +114,65 @@ function splitStoneTex(art) {
 }
 
 /* ------------------------------------------------------------ */
+/*  Образец камня для выбора: та же фактура, что рисует модель,  */
+/*  только маленький рисунок прямо в плитке. Никаких файлов —    */
+/*  рисунок считается на canvas при первом открытии.             */
+/* ------------------------------------------------------------ */
+const SW = {};
+export function stoneSwatch(pal) {
+  const key = pal || "gabbro";
+  if (SW[key]) return SW[key];
+  const art = STONE_ART[key] || STONE_ART.gabbro;
+  const w = 220, h = 130;
+  const c = document.createElement("canvas");
+  c.width = w; c.height = h;
+  const g = c.getContext("2d");
+
+  /* фон и крупные пятна — общий тон камня */
+  g.fillStyle = art.base;
+  g.fillRect(0, 0, w, h);
+  blobs(g, Math.max(w, h), art.blobs, 26, 0.12, 0.16, 9, 22);
+
+  /* прожилки, если они есть у этого камня */
+  if (art.vein) {
+    g.strokeStyle = art.vein;
+    for (let i = 0; i < 7; i++) {
+      g.globalAlpha = 0.10 + Math.random() * 0.16;
+      g.lineWidth = 1 + Math.random() * 2.4;
+      const y = Math.random() * h;
+      g.beginPath();
+      g.moveTo(0, y);
+      g.bezierCurveTo(w * 0.35, y + (Math.random() - 0.5) * 34,
+                      w * 0.7, y + (Math.random() - 0.5) * 34,
+                      w, y + (Math.random() - 0.5) * 20);
+      g.stroke();
+    }
+  }
+
+  /* зерно: те же цвета и размеры, что на модели, плотность по площади */
+  const n = Math.round(art.n * (w * h) / (512 * 512) * 1.7);
+  for (let i = 0; i < n; i++) {
+    g.fillStyle = art.grains[i % art.grains.length];
+    g.globalAlpha = art.ga0 + Math.random() * (art.ga1 - art.ga0);
+    const r = art.gmin + Math.random() * (art.gmax - art.gmin);
+    g.beginPath();
+    g.arc(Math.random() * w, Math.random() * h, r, 0, 6.283);
+    g.fill();
+  }
+  g.globalAlpha = 1;
+
+  /* лёгкий блик полировки, чтобы образец не выглядел плоским */
+  const sh = g.createLinearGradient(0, 0, w, h);
+  sh.addColorStop(0, "rgba(255,255,255,0.16)");
+  sh.addColorStop(0.45, "rgba(255,255,255,0)");
+  sh.addColorStop(1, "rgba(0,0,0,0.18)");
+  g.fillStyle = sh;
+  g.fillRect(0, 0, w, h);
+
+  return (SW[key] = c.toDataURL("image/jpeg", 0.9));
+}
+
+/* ------------------------------------------------------------ */
 /*  Покрытия участка: грунт, крошка, брус, плитка 30×30.        */
 /* ------------------------------------------------------------ */
 function coverTex(entry) {

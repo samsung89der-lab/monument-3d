@@ -3,7 +3,7 @@
    Ничего не считает сам: за размеры отвечает engine.js, за
    картинку — scene.mjs. Здесь только состояние и обвязка.
    ============================================================ */
-import { create } from "./scene.mjs?v=4";
+import { create, stoneSwatch } from "./scene.mjs?v=5";
 
 const CFG = window.MON_CFG;
 const E = window.ENGINE;
@@ -78,7 +78,8 @@ function chipSet(host, items, getVal, setVal) {
     b.type = "button";
     b.dataset.id = it.id;
     b.innerHTML = (it.swatch
-      ? '<span class="sw" style="--c1:' + it.swatch[0] + ";--c2:" + it.swatch[1] + ";--c3:" + it.swatch[2] + '"></span>'
+      ? '<span class="sw" style="--c1:' + it.swatch[0] + ";--c2:" + it.swatch[1] + ";--c3:" + it.swatch[2]
+        + (it.thumb ? ";background-image:url(" + it.thumb + ")" : "") + '"></span>'
       : "") + "<b>" + it.name + "</b>" + (it.hint ? "<small>" + it.hint + "</small>" : "");
     b.addEventListener("click", () => { setVal(it.id); S = E.sanitize(S, CFG); render(); });
     host.appendChild(b);
@@ -97,6 +98,8 @@ chipSet(els.sizeChips, CFG.sizes, null, (id) => {
   if (sz) { S.stela.w = sz.w; S.stela.h = sz.h; S.stela.th = sz.th; }
   dirty.size = true;
 });
+/* образец камня рисуем из той же фактуры, что и модель: файлов нет */
+CFG.stones.forEach((s) => { try { s.thumb = stoneSwatch(s.pal || s.id); } catch (e) { s.thumb = ""; } });
 chipSet(els.stoneChips, CFG.stones, null, (id) => { S.stela.stone = id; });
 chipSet(els.sidesChips, CFG.sides, null, (id) => { S.stela.sides = id; });
 chipSet(els.tumbaChips, CFG.tumbas, null, (id) => { S.tumba = id; });
