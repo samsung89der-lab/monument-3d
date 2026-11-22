@@ -24,9 +24,13 @@ let ANISO = 1;                    // считаем после появлени�
 /* ------------------------------------------------------------ */
 const STONE_ART = {
   gabbro:    { base: "#17181c", blobs: ["#14161a", "#1d1f24", "#22252a"], grains: ["#3a3d43", "#4e5258", "#6a6f76", "#0f1013"], n: 6500, gmin: 0.4, gmax: 1.5, ga0: 0.12, ga1: 0.55, rough: 0.14, env: 1.0 },
-  gabbroUa:  { base: "#212525", blobs: ["#1b1f1f", "#282c2b", "#2f3433"], grains: ["#4a4f4d", "#626765", "#7d8280", "#191c1c"], n: 6500, gmin: 0.5, gmax: 1.7, ga0: 0.14, ga1: 0.6, rough: 0.18, env: 0.9 },
-  red:       { base: "#4a2420", blobs: ["#3d1e1a", "#552b25", "#61322a"], grains: ["#6e3c33", "#89564a", "#a5736a", "#2c1512"], n: 6500, gmin: 0.6, gmax: 2.1, ga0: 0.16, ga1: 0.6, rough: 0.20, env: 0.8 },
-  gray:      { base: "#8b8f92", blobs: ["#7e8285", "#979b9d", "#a3a7a9"], grains: ["#5f6366", "#6f7476", "#b0b4b6", "#4b4f52"], n: 7000, gmin: 0.6, gmax: 2.2, ga0: 0.16, ga1: 0.6, rough: 0.24, env: 0.7, light: true },
+  ampho:     { base: "#24272b", blobs: ["#1c1f22", "#2f3337", "#3b4045"], grains: ["#c9ccce", "#9aa0a3", "#6d7275", "#15171a"], n: 7000, gmin: 0.6, gmax: 2.4, ga0: 0.16, ga1: 0.6, rough: 0.20, env: 0.85 },
+  dym:       { base: "#6e4f45", blobs: ["#5c453d", "#7d5f4f", "#8f6a58"], grains: ["#a8887a", "#c2a291", "#46352e", "#d8bcae"], n: 7200, gmin: 0.7, gmax: 2.6, ga0: 0.16, ga1: 0.62, rough: 0.26, env: 0.6 },
+  red:       { base: "#8c4a38", blobs: ["#7c3f30", "#9a5741", "#a8654a"], grains: ["#c07f5f", "#d59a74", "#512519", "#6e3628"], n: 6800, gmin: 0.7, gmax: 2.4, ga0: 0.16, ga1: 0.62, rough: 0.22, env: 0.7 },
+  susks:     { base: "#a5908f", blobs: ["#988484", "#b3a0a0", "#8d7a7b"], grains: ["#cbbabb", "#e3d5d4", "#6f5f61", "#5b4e50"], n: 7000, gmin: 0.6, gmax: 2.3, ga0: 0.16, ga1: 0.6, rough: 0.24, env: 0.65, light: true },
+  indian:    { base: "#3a2b21", blobs: ["#31241b", "#46342a", "#584231"], grains: ["#8a6b4e", "#6d5440", "#1f1812", "#a3835f"], n: 5200, gmin: 0.5, gmax: 2.0, ga0: 0.14, ga1: 0.55, vein: "#8a6b4e", rough: 0.20, env: 0.75 },
+  gray:      { base: "#a2a6a8", blobs: ["#979b9d", "#aeb1b3", "#8c9093"], grains: ["#6a6d70", "#7e8285", "#c6c9cb", "#565a5d"], n: 7200, gmin: 0.7, gmax: 2.5, ga0: 0.16, ga1: 0.62, rough: 0.24, env: 0.65, light: true },
+  mansur:    { base: "#c0c1bd", blobs: ["#b5b6b2", "#cdcfc9", "#aaada9"], grains: ["#8f938f", "#a6aaa6", "#d8d9d4", "#7c807c"], n: 6800, gmin: 0.6, gmax: 2.0, ga0: 0.16, ga1: 0.6, rough: 0.28, env: 0.55, light: true },
   marble:    { base: "#e4e1d8", blobs: ["#dbd8cf", "#eeebe3", "#d5d1c7"], grains: ["#c8c4ba", "#b8b3a8", "#f1efe8"], n: 2600, gmin: 0.5, gmax: 1.4, ga0: 0.10, ga1: 0.4, vein: "#b6b1a4", rough: 0.30, env: 0.55, light: true }
 };
 

@@ -19,6 +19,10 @@ var MON_CFG = {
      вернёте true, и смета встанет на место. */
   showPrices: false,
 
+  /* Показывать ли карточку «Готовые сцены». false — карточка скрыта, сами
+     пресеты в `presets` остаются на месте: вернёте true, и они вернутся. */
+  showScenes: false,
+
   tenant: {
     name: "3D-конструктор памятника",
     geo: "Минск и область",
@@ -61,19 +65,28 @@ var MON_CFG = {
   ],
 
   /* ---------- камень: m2 — лицевая поверхность (м²), m3 — объём (м³).
-      pal — палитра канвасной текстуры в scene.mjs (gabbro | gabbroUa |
-      red | gray | marble). ---------- */
+      pal — палитра канвасной текстуры в scene.mjs. swatch — три цвета для
+      образца в плитке: фон, второй тон, зерно. Названия — по образцам,
+      которые показывает мастерская; цены пока демо. ---------- */
   stones: [
-    { id: "gabbro",     name: "Габбро-диабаз (Карелия)",  m2: 1500, m3: 6800, dark: true,  pal: "gabbro",
-      hint: "чёрный, зеркальная полировка" },
-    { id: "gabbroUa",   name: "Габбро-диабаз (Украина)",  m2: 1200, m3: 6000, dark: true,  pal: "gabbroUa",
-      hint: "чуть светлее, с прожилками" },
-    { id: "graniteRed", name: "Гранит красный (Куркуль)", m2: 1700, m3: 7600, dark: false, pal: "red",
-      hint: "тёмно-красный, крупное зерно" },
-    { id: "graniteGray",name: "Гранит серый (Каплинское)",m2: 1400, m3: 6200, dark: false, pal: "gray",
-      hint: "серо-зернистый, спокойный" },
-    { id: "marble",     name: "Мрамор белый (Коелга)",    m2: 1300, m3: 5600, light: true, pal: "marble",
-      hint: "светлый мягкий камень" }
+    { id: "gabbro",  name: "Габбро-диабаз",      m2: 1500, m3: 6800, dark: true,  pal: "gabbro",
+      swatch: ["#191b1f", "#2a2d33", "#6a6f76"], hint: "чёрный, зеркальная полировка" },
+    { id: "ampho",   name: "Амфиболит",          m2: 1350, m3: 6100, dark: true,  pal: "ampho",
+      swatch: ["#232629", "#3a3e42", "#c9ccce"], hint: "тёмный с белым вкраплением" },
+    { id: "dym",     name: "Дымовский",          m2: 1600, m3: 7100, dark: false, pal: "dym",
+      swatch: ["#6e4f45", "#8f6a58", "#c2a291"], hint: "коричнево-серый, пёстрый рисунок" },
+    { id: "leznik",  name: "Лезниковский",       m2: 1700, m3: 7600, dark: false, pal: "red",
+      swatch: ["#8c4a38", "#a8654a", "#d59a74"], hint: "тёплый красный, крупное зерно" },
+    { id: "susks",   name: "Сюскюянсаари",       m2: 1750, m3: 7800, dark: false, pal: "susks",
+      swatch: ["#a5908f", "#c0aaaa", "#e3d5d4"], hint: "розово-серый, спокойный рисунок" },
+    { id: "indian",  name: "Индиан Аврора",      m2: 1900, m3: 8200, dark: true,  pal: "indian",
+      swatch: ["#3a2b21", "#57402e", "#8a6b4e"], hint: "тёмно-коричневый, выразительные прожилки" },
+    { id: "pokost",  name: "Покостовский",       m2: 1450, m3: 6400, dark: false, pal: "gray",
+      swatch: ["#a2a6a8", "#b8bbbd", "#6a6d70"], hint: "серо-белый, крупное зерно" },
+    { id: "mansur",  name: "Мансуровский",       m2: 1550, m3: 6900, dark: false, pal: "mansur",
+      swatch: ["#c0c1bd", "#d3d5cf", "#8f938f"], hint: "светло-серый, ровный тон" },
+    { id: "marble",  name: "Мрамор белый",       m2: 1300, m3: 5600, dark: false, pal: "marble", light: true,
+      swatch: ["#e2dfd6", "#efece4", "#b8b3a8"], hint: "светлый мягкий камень" }
   ],
 
   /* ---------- обработка боков стелы: k — надбавка к стеле ---------- */
@@ -198,7 +211,7 @@ var MON_CFG = {
              "extras.vases": true } },
     { id: "portrait", name: "С портретом", note: "капля, портрет в камне",
       set: { "stela.form": "cap", "stela.w": 0.70, "stela.h": 1.00, "stela.th": 0.10,
-             "stela.stone": "gabbroUa", "stela.sides": "rock",
+             "stela.stone": "ampho", "stela.sides": "rock",
              "tumba": "two", "cvetnik": "gran", "cover": "crumb", "fence": "mix",
              "plot.w": 1.70, "plot.d": 1.20,
              "engr.fio": "ИВАН ПЕТРОВ", "engr.years": "1954 — 2021",
@@ -210,9 +223,9 @@ var MON_CFG = {
              "tumba": "one", "cvetnik": "none", "cover": "pavers", "fence": "metal",
              "plot.w": 1.20, "plot.d": 1.20,
              "engr.years": "1954 — 2021", "engr.cross": true, "engr.photoMode": "none" } },
-    { id: "krest", name: "Крест", note: "силуэт креста, красный гранит",
+    { id: "krest", name: "Крест", note: "силуэт креста, красно-коричневый камень",
       set: { "stela.form": "krest", "stela.w": 0.80, "stela.h": 1.20, "stela.th": 0.12,
-             "stela.stone": "graniteRed", "stela.sides": "rock",
+             "stela.stone": "leznik", "stela.sides": "rock",
              "tumba": "three", "cvetnik": "poly", "cover": "chips", "fence": "granite",
              "plot.w": 1.70, "plot.d": 1.20,
              "engr.cross": false, "engr.photoMode": "none" } },
@@ -225,7 +238,7 @@ var MON_CFG = {
              "engr.photoMode": "metal", "bg": "studio" } },
     { id: "family", name: "Семейный", note: "большой участок, столик и скамья",
       set: { "stela.form": "fig", "stela.w": 1.00, "stela.h": 1.10, "stela.th": 0.10,
-             "stela.stone": "graniteGray", "stela.sides": "rock",
+             "stela.stone": "pokost", "stela.sides": "rock",
              "tumba": "three", "cvetnik": "gran", "cover": "crumb", "fence": "mix",
              "plot.w": 2.50, "plot.d": 1.80,
              "engr.fio": "СЕМЬЯ ИВАНОВЫХ", "engr.years": "1948 — 2022", "engr.cross": true,

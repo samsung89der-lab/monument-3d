@@ -3,7 +3,7 @@
    Ничего не считает сам: за размеры отвечает engine.js, за
    картинку — scene.mjs. Здесь только состояние и обвязка.
    ============================================================ */
-import { create } from "./scene.mjs?v=2";
+import { create } from "./scene.mjs?v=4";
 
 const CFG = window.MON_CFG;
 const E = window.ENGINE;
@@ -58,6 +58,12 @@ if (!PRICES) {
   if (hero) hero.textContent = "Соберите памятник и увидите состав работ сразу";
 }
 
+/* Готовые сцены показываем или нет — строка showScenes в config.js.
+   Пресеты при этом остаются в конфиге: скрыта только карточка. */
+if (!CFG.showScenes) {
+  Array.prototype.forEach.call(document.querySelectorAll("[data-scenes]"), (el) => { el.hidden = true; });
+}
+
 /* ---------------- состояние ---------------- */
 const fromLink = E.unpack((location.hash || "").replace(/^#p=/, ""));
 let S = E.sanitize(fromLink, CFG);
@@ -71,7 +77,9 @@ function chipSet(host, items, getVal, setVal) {
     const b = document.createElement("button");
     b.type = "button";
     b.dataset.id = it.id;
-    b.innerHTML = "<b>" + it.name + "</b>" + (it.hint ? "<small>" + it.hint + "</small>" : "");
+    b.innerHTML = (it.swatch
+      ? '<span class="sw" style="--c1:' + it.swatch[0] + ";--c2:" + it.swatch[1] + ";--c3:" + it.swatch[2] + '"></span>'
+      : "") + "<b>" + it.name + "</b>" + (it.hint ? "<small>" + it.hint + "</small>" : "");
     b.addEventListener("click", () => { setVal(it.id); S = E.sanitize(S, CFG); render(); });
     host.appendChild(b);
   });
