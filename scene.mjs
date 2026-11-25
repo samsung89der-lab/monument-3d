@@ -15,7 +15,7 @@ import * as THREE from "three";
 import { OrbitControls } from "./vendor/examples/jsm/controls/OrbitControls.js";
 import { RoomEnvironment } from "./vendor/examples/jsm/environments/RoomEnvironment.js";
 import { CATALOG } from "./forms.mjs?v=2";
-import { CATALOG_C } from "./forms-c.mjs?v=1";
+import { CATALOG_C } from "./forms-c.mjs?v=2";
 
 const RAD = Math.PI / 180;
 const T = {};                     // кэш фактур: одна запись каталога = один холст

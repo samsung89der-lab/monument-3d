@@ -5,7 +5,7 @@
    ============================================================ */
 import { create, stoneSwatch, formOutline } from "./scene.mjs?v=12";
 import { CATALOG } from "./forms.mjs?v=2";
-import { CATALOG_C } from "./forms-c.mjs?v=1";
+import { CATALOG_C } from "./forms-c.mjs?v=2";
 
 const CFG = window.MON_CFG;
 const E = window.ENGINE;
