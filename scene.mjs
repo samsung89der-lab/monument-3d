@@ -624,6 +624,13 @@ function faceSize(state, G) {
   if (f === "strelna") return { w: G.stela.w * 0.60, h: G.stela.h * 0.44, cy: G.stela.h * 0.25 };
   if (f === "oblako") return { w: G.stela.w * 0.72, h: G.stela.h * 0.54, cy: G.stela.h * 0.30 };
   if (f === "serdce") return { w: G.stela.w * 0.66, h: G.stela.h * 0.40, cy: G.stela.h * 0.24 };
+  /* контуры из каталога форм: парус, талия, ступени, шатровая, трапеция */
+  if (f === "parus") return { w: G.stela.w * 0.74, h: G.stela.h * 0.62, cy: G.stela.h * 0.33 };
+  if (f === "parus2") return { w: G.stela.w * 0.60, h: G.stela.h * 0.44, cy: G.stela.h * 0.24 };
+  if (f === "taliya") return { w: G.stela.w * 0.70, h: G.stela.h * 0.62, cy: G.stela.h * 0.33 };
+  if (f === "stupeni") return { w: G.stela.w * 0.62, h: G.stela.h * 0.54, cy: G.stela.h * 0.30 };
+  if (f === "shatrovaya") return { w: G.stela.w * 0.64, h: G.stela.h * 0.50, cy: G.stela.h * 0.27 };
+  if (f === "trapetsiya") return { w: G.stela.w * 0.64, h: G.stela.h * 0.64, cy: G.stela.h * 0.35 };
   return { w: G.stela.w * 0.96, h: G.stela.h * 0.96, cy: G.stela.h * 0.49 };
 }
 function wrapEngr(g, txt, x, y, size, maxW) {
@@ -730,6 +737,42 @@ function outlineOf(form, w, h) {
       ["C", -hw, h * 0.80, -hw * 0.74, h, -hw * 0.24, h * 0.88],
       ["Q", 0, h * 0.66, hw * 0.24, h * 0.88],
       ["C", hw * 0.74, h, hw, h * 0.80, hw, h * 0.42],
+      ["L", hw, 0], ["Z"]];
+  }
+  if (form === "parus") {
+    /* парус: левый бок прямой, верхняя кромка уходит дугой к правому краю */
+    return [["M", -hw, 0], ["L", -hw, h],
+      ["C", -hw * 0.20, h * 0.98, hw * 0.55, h * 0.78, hw, h * 0.34],
+      ["L", hw, 0], ["Z"]];
+  }
+  if (form === "parus2") {
+    /* парус с выгибом внутрь: кромка прогибается под дугу */
+    return [["M", -hw, 0], ["L", -hw, h],
+      ["C", -hw * 0.34, h * 0.64, hw * 0.36, h * 0.42, hw, h * 0.14],
+      ["L", hw, 0], ["Z"]];
+  }
+  if (form === "taliya") {
+    /* талия: у середины бок уже, чем у основания и у верха */
+    return [["M", -hw, 0], ["Q", -hw * 0.66, h * 0.48, -hw * 0.90, h * 0.90],
+      ["Q", -hw * 0.44, h, 0, h],
+      ["Q", hw * 0.44, h, hw * 0.90, h * 0.90],
+      ["Q", hw * 0.66, h * 0.48, hw, 0], ["Z"]];
+  }
+  if (form === "stupeni") {
+    /* ступени: левая часть выше, правый бок спускается уступами */
+    return [["M", -hw, 0], ["L", -hw, h - ch], ["L", -hw + ch, h],
+      ["L", hw * 0.62, h], ["L", hw * 0.62, h * 0.80],
+      ["L", hw * 0.84, h * 0.80], ["L", hw * 0.84, h * 0.58],
+      ["L", hw, h * 0.58], ["L", hw, 0], ["Z"]];
+  }
+  if (form === "shatrovaya") {
+    /* шатровая: прямые линии сходятся в верхнюю точку */
+    return [["M", -hw, 0], ["L", -hw, h * 0.62], ["L", 0, h],
+      ["L", hw, h * 0.62], ["L", hw, 0], ["Z"]];
+  }
+  if (form === "trapetsiya") {
+    /* трапеция, «расшив»: бока идут, сужаясь к верху */
+    return [["M", -hw, 0], ["L", -hw * 0.74, h], ["L", hw * 0.74, h],
       ["L", hw, 0], ["Z"]];
   }
   /* Прямая и всё неизвестное: прямоугольник со снятыми углами. */

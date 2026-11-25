@@ -3,7 +3,7 @@
    Ничего не считает сам: за размеры отвечает engine.js, за
    картинку — scene.mjs. Здесь только состояние и обвязка.
    ============================================================ */
-import { create, stoneSwatch, formOutline } from "./scene.mjs?v=8";
+import { create, stoneSwatch, formOutline } from "./scene.mjs?v=9";
 
 const CFG = window.MON_CFG;
 const E = window.ENGINE;
