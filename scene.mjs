@@ -15,6 +15,7 @@ import * as THREE from "three";
 import { OrbitControls } from "./vendor/examples/jsm/controls/OrbitControls.js";
 import { RoomEnvironment } from "./vendor/examples/jsm/environments/RoomEnvironment.js";
 import { CATALOG } from "./forms.mjs?v=2";
+import { CATALOG_C } from "./forms-c.mjs?v=1";
 
 const RAD = Math.PI / 180;
 const T = {};                     // кэш фактур: одна запись каталога = один холст
@@ -727,10 +728,12 @@ function cropFit(img, w, h) {
    до h (верх). Держим все точки внутри прямоугольника w × h, иначе стела
    окажется шире или выше заявленного размера. */
 function outlineOf(form, w, h) {
-  /* Каталог форм (листы 01–10, номера 1–60): контур задан в долях камня —
-     x от -0.5 до 0.5, y от 0 до 1. Переводим в метры и работаем как обычно. */
-  if (CATALOG[form]) {
-    return CATALOG[form].cmds.map((c) => {
+  /* Каталог форм (листы 01–10, номера 1–60) и серии С (листы 11–20,
+     обведённые программой): контур задан в долях камня — x от -0.5 до 0.5,
+     y от 0 до 1. Переводим в метры и работаем как обычно. */
+  const CF = CATALOG[form] || CATALOG_C[form];
+  if (CF) {
+    return CF.cmds.map((c) => {
       if (c[0] === "Z") return c;
       const out = [c[0]];
       for (let i = 1; i < c.length; i += 2) {

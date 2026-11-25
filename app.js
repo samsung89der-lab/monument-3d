@@ -3,8 +3,9 @@
    Ничего не считает сам: за размеры отвечает engine.js, за
    картинку — scene.mjs. Здесь только состояние и обвязка.
    ============================================================ */
-import { create, stoneSwatch, formOutline } from "./scene.mjs?v=11";
+import { create, stoneSwatch, formOutline } from "./scene.mjs?v=12";
 import { CATALOG } from "./forms.mjs?v=2";
+import { CATALOG_C } from "./forms-c.mjs?v=1";
 
 const CFG = window.MON_CFG;
 const E = window.ENGINE;
@@ -125,8 +126,34 @@ Object.keys(CATALOG).forEach((id) => {
   const c = CATALOG[id];
   CFG.forms.push({ id: id, name: "\u2116 " + c.num + " \u00b7 " + c.name, k: c.k || 1.24, hint: c.hint });
 });
+/* серии С с листов 11–20: имена — это коды из каталога */
+Object.keys(CATALOG_C).forEach((id) => {
+  const c = CATALOG_C[id];
+  CFG.forms.push({ id: id, name: c.code, k: c.k || 1.3, hint: c.hint, ar: c.ar });
+});
 CFG.forms.forEach((f) => { f.sil = f.id; });
 const FORMS = CFG.forms;
+
+/* Фигуры серий С сняты с фотографий, у них своя пропорция (например
+   wide-табличка шире высоты в 1.4 раза). Если выбранный размер сильно
+   отличается от пропорции с листа, подгоняем ширину под высоту — иначе
+   трёхмерная фигура вытянется и будет не похожа на оригинал. Размер
+   потом можно поменять руками в поле «Размер стелы». */
+let sizeNote = "";
+function fitSizeToForm(it) {
+  const ar = it.ar;
+  if (!ar || ar <= 0) return;
+  const cur = S.stela.w / S.stela.h;
+  if (Math.abs(cur - ar) / ar <= 0.12) return;
+  let w = Math.round(S.stela.h * ar * 100) / 100;
+  let h = S.stela.h;
+  if (w > 1.80) { w = 1.80; h = Math.round((w / ar) * 100) / 100; }
+  if (w < 0.30) { w = 0.30; h = Math.round((w / ar) * 100) / 100; }
+  S.stela.w = w;
+  S.stela.h = h;
+  dirty.size = true;
+  sizeNote = "размер подогнан под форму: " + Math.round(w * 100) + "\u00d7" + Math.round(h * 100) + " см";
+}
 
 function formRow(it) {
   const b = document.createElement("button");
@@ -137,6 +164,8 @@ function formRow(it) {
     + (it.hint ? "<small>" + it.hint + "</small>" : "") + "</span>";
   b.addEventListener("click", () => {
     S.stela.form = it.id;
+    sizeNote = "";
+    if (it.ar) fitSizeToForm(it);
     S = E.sanitize(S, CFG);
     openFormList(false);
     render();
@@ -161,7 +190,7 @@ function markForm() {
   const it = FORMS.filter((x) => x.id === S.stela.form)[0] || FORMS[0];
   els.formBtn.querySelector(".dd-sil").innerHTML = silSvg(it.id);
   els.formBtn.querySelector(".dd-name").textContent = it.name;
-  els.formHint.textContent = it.hint || "";
+  els.formHint.textContent = sizeNote ? ((it.hint || "") + " \u00b7 " + sizeNote) : (it.hint || "");
   Array.prototype.forEach.call(els.formList.children, (b) => {
     b.classList.toggle("on", b.dataset.id === S.stela.form);
   });
