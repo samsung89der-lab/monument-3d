@@ -113,9 +113,9 @@ var MON_CFG = {
      name показываем человеку в сантиметрах — так про размер говорят живые
      люди; w/h/th внутри в метрах, из них считается площадь и объём */
   sizes: [
-    { id: "sz1",  name: "50 × 80",   w: 0.50, h: 0.80, th: 0.08 },
-    { id: "sz2",  name: "50 × 100",  w: 0.50, h: 1.00, th: 0.08 },
-    { id: "sz3",  name: "60 × 100",  w: 0.60, h: 1.00, th: 0.08 },
+    { id: "sz1",  name: "50 × 80",   w: 0.50, h: 0.80, th: 0.10 },
+    { id: "sz2",  name: "50 × 100",  w: 0.50, h: 1.00, th: 0.10 },
+    { id: "sz3",  name: "60 × 100",  w: 0.60, h: 1.00, th: 0.10 },
     { id: "sz4",  name: "60 × 120",  w: 0.60, h: 1.20, th: 0.10 },
     { id: "sz5",  name: "80 × 120",  w: 0.80, h: 1.20, th: 0.10 },
     { id: "sz5b", name: "100 × 120", w: 1.00, h: 1.20, th: 0.10 }
@@ -216,7 +216,7 @@ var MON_CFG = {
       Значения каталогов проверяются тестом tests/roundtrip.mjs. ---------- */
   presets: [
     { id: "classic", name: "Классика", note: "тумба, гранит, крест",
-      set: { "stela.form": "pryam", "stela.w": 0.60, "stela.h": 0.90, "stela.th": 0.08,
+      set: { "stela.form": "pryam", "stela.w": 0.60, "stela.h": 0.90, "stela.th": 0.10,
              "stela.stone": "gabbro", "stela.sides": "rock",
              "tumba": "two", "cvetnik": "gran", "plot.w": 1.20, "plot.d": 1.20,
              "cover": "crumb", "fence": "metal",
@@ -231,7 +231,7 @@ var MON_CFG = {
              "engr.cross": true, "engr.photoMode": "stone", "engr.art": true,
              "extras.vases": true, "extras.table": true } },
     { id: "strict", name: "Строгий", note: "прямая, термообработка, брусчатка",
-      set: { "stela.form": "pryam", "stela.w": 0.50, "stela.h": 0.80, "stela.th": 0.08,
+      set: { "stela.form": "pryam", "stela.w": 0.50, "stela.h": 0.80, "stela.th": 0.10,
              "stela.stone": "gabbro", "stela.sides": "thermo",
              "tumba": "one", "cvetnik": "none", "cover": "pavers", "fence": "metal",
              "plot.w": 1.20, "plot.d": 1.20,
@@ -243,7 +243,7 @@ var MON_CFG = {
              "plot.w": 1.70, "plot.d": 1.20,
              "engr.cross": false, "engr.photoMode": "none" } },
     { id: "light", name: "Светлый", note: "мрамор, арка, полировка",
-      set: { "stela.form": "ark", "stela.w": 0.60, "stela.h": 0.90, "stela.th": 0.08,
+      set: { "stela.form": "ark", "stela.w": 0.60, "stela.h": 0.90, "stela.th": 0.10,
              "stela.stone": "marble", "stela.sides": "polish",
              "tumba": "one", "cvetnik": "poly", "cover": "tiles", "fence": "granite",
              "plot.w": 1.20, "plot.d": 1.20,

@@ -88,7 +88,7 @@ function tfFlags(cfg, src) {
 }
 
 function defaultState(cfg) {
-  var size = (cfg.sizes && cfg.sizes[2]) || (cfg.sizes && cfg.sizes[0]) || { w: 0.60, h: 0.90, th: 0.08 };
+  var size = (cfg.sizes && cfg.sizes[2]) || (cfg.sizes && cfg.sizes[0]) || { w: 0.60, h: 0.90, th: 0.10 };
   /* участок, с которого начинают сборку: id из cfg.defaults.plot.
      Самый маленький вариант выглядит тесно — человек видит памятник
      впритык к ограде и пугается, что «не влезет» */
