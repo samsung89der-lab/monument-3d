@@ -14,6 +14,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "./vendor/examples/jsm/controls/OrbitControls.js";
 import { RoomEnvironment } from "./vendor/examples/jsm/environments/RoomEnvironment.js";
+import { CATALOG } from "./forms.mjs?v=2";
 
 const RAD = Math.PI / 180;
 const T = {};                     // кэш фактур: одна запись каталога = один холст
@@ -609,29 +610,84 @@ function fitFont(g, txt, maxW, startPx, minPx, fontOf) {
   g.font = fontOf(size);
   return size;
 }
-/* размер плоскости гравировки под конкретный контур стелы:
-   у креста и фигурной стелы верх уже, чем низ — прямоугольник там повиснет */
+/* Размер плоскости гравировки под контур стелы. Прямоугольник не задаём
+   руками для каждой формы: ищем самый большой, который весь лежит внутри
+   контура. Так буквы не залезают ни на плечи, ни на стрелку, ни на вырез. */
+function outlinePoints(cmds) {
+  const pts = [], N = 12;
+  let x = 0, y = 0, sx = 0, sy = 0;
+  for (const c of cmds) {
+    if (c[0] === "M") { x = sx = c[1]; y = sy = c[2]; pts.push([x, y]); }
+    else if (c[0] === "L") { x = c[1]; y = c[2]; pts.push([x, y]); }
+    else if (c[0] === "Q") {
+      const cx = c[1], cy = c[2], ex = c[3], ey = c[4];
+      for (let i = 1; i <= N; i++) {
+        const t = i / N, u = 1 - t;
+        pts.push([u * u * x + 2 * u * t * cx + t * t * ex,
+                  u * u * y + 2 * u * t * cy + t * t * ey]);
+      }
+      x = ex; y = ey;
+    } else if (c[0] === "C") {
+      const ax = c[1], ay = c[2], bx = c[3], by = c[4], ex = c[5], ey = c[6];
+      for (let i = 1; i <= N; i++) {
+        const t = i / N, u = 1 - t;
+        pts.push([u * u * u * x + 3 * u * u * t * ax + 3 * u * t * t * bx + t * t * t * ex,
+                  u * u * u * y + 3 * u * u * t * ay + 3 * u * t * t * by + t * t * t * ey]);
+      }
+      x = ex; y = ey;
+    } else { x = sx; y = sy; }
+  }
+  return pts;
+}
+function inPoly(pts, px, py) {
+  let inside = false;
+  for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
+    const xi = pts[i][0], yi = pts[i][1], xj = pts[j][0], yj = pts[j][1];
+    if (((yi > py) !== (yj > py)) && (px < (xj - xi) * (py - yi) / (yj - yi) + xi)) {
+      inside = !inside;
+    }
+  }
+  return inside;
+}
+const FACEC = {};
+function fitFace(form, w, h) {
+  const key = form + "|" + w.toFixed(3) + "|" + h.toFixed(3);
+  if (FACEC[key]) return FACEC[key];
+  const pts = outlinePoints(outlineOf(form, w, h));
+  /* прямоугольник проверяем по периметру: 6 точек на сторону достаточно,
+     контуры стел плавные и длинных вогнутых участков на стороне нет */
+  const fits = (bw, bh, cy) => {
+    const hw = bw / 2, y0 = cy - bh / 2, y1 = cy + bh / 2;
+    for (let i = 0; i <= 6; i++) {
+      const t = i / 6, xl = -hw + 2 * hw * t;
+      if (!inPoly(pts, xl, y0) || !inPoly(pts, xl, y1)) return false;
+      const yl = y0 + (y1 - y0) * t;
+      if (!inPoly(pts, -hw, yl) || !inPoly(pts, hw, yl)) return false;
+    }
+    return true;
+  };
+  let best = { w: w * 0.52, h: h * 0.40, cy: h * 0.44 };
+  for (let ih = 3; ih <= 12; ih++) {
+    const bh = h * ih / 12;
+    for (let iw = 3; iw <= 12; iw++) {
+      const bw = w * iw / 12;
+      const asp = bw / bh;
+      /* пропорция около квадратной: узкая щель или широкий пояс не нужны */
+      if (asp < 0.45 || asp > 1.6) continue;
+      for (let iy = 0; iy <= 10; iy++) {
+        const cy = bh / 2 + (h - bh) * iy / 10;
+        if (bw * bh > best.w * best.h && fits(bw, bh, cy)) {
+          best = { w: bw, h: bh, cy };
+        }
+      }
+    }
+  }
+  best.w *= 0.94; best.h *= 0.94;
+  FACEC[key] = best;
+  return best;
+}
 function faceSize(state, G) {
-  const f = state.stela.form;
-  if (f === "krest") return { w: G.stela.w * 0.60, h: G.stela.h * 0.56, cy: G.stela.h * 0.29 };
-  if (f === "fig") return { w: G.stela.w * 0.78, h: G.stela.h * 0.56, cy: G.stela.h * 0.28 };
-  if (f === "cap") return { w: G.stela.w * 0.84, h: G.stela.h * 0.78, cy: G.stela.h * 0.40 };
-  if (f === "ark") return { w: G.stela.w * 0.78, h: G.stela.h * 0.78, cy: G.stela.h * 0.40 };
-  /* новые контуры: прямоугольник гравировки берём с запасом, чтобы буквы
-     не залезли на плечи, стрелку, дуги облака или вырез сердца */
-  if (f === "plechi") return { w: G.stela.w * 0.86, h: G.stela.h * 0.56, cy: G.stela.h * 0.31 };
-  if (f === "volna") return { w: G.stela.w * 0.84, h: G.stela.h * 0.62, cy: G.stela.h * 0.34 };
-  if (f === "strelna") return { w: G.stela.w * 0.60, h: G.stela.h * 0.44, cy: G.stela.h * 0.25 };
-  if (f === "oblako") return { w: G.stela.w * 0.72, h: G.stela.h * 0.54, cy: G.stela.h * 0.30 };
-  if (f === "serdce") return { w: G.stela.w * 0.66, h: G.stela.h * 0.40, cy: G.stela.h * 0.24 };
-  /* контуры из каталога форм: парус, талия, ступени, шатровая, трапеция */
-  if (f === "parus") return { w: G.stela.w * 0.74, h: G.stela.h * 0.62, cy: G.stela.h * 0.33 };
-  if (f === "parus2") return { w: G.stela.w * 0.60, h: G.stela.h * 0.44, cy: G.stela.h * 0.24 };
-  if (f === "taliya") return { w: G.stela.w * 0.70, h: G.stela.h * 0.62, cy: G.stela.h * 0.33 };
-  if (f === "stupeni") return { w: G.stela.w * 0.62, h: G.stela.h * 0.54, cy: G.stela.h * 0.30 };
-  if (f === "shatrovaya") return { w: G.stela.w * 0.64, h: G.stela.h * 0.50, cy: G.stela.h * 0.27 };
-  if (f === "trapetsiya") return { w: G.stela.w * 0.64, h: G.stela.h * 0.64, cy: G.stela.h * 0.35 };
-  return { w: G.stela.w * 0.96, h: G.stela.h * 0.96, cy: G.stela.h * 0.49 };
+  return fitFace(state.stela.form, G.stela.w, G.stela.h);
 }
 function wrapEngr(g, txt, x, y, size, maxW) {
   const words = String(txt).split(/\s+/);
@@ -671,6 +727,19 @@ function cropFit(img, w, h) {
    до h (верх). Держим все точки внутри прямоугольника w × h, иначе стела
    окажется шире или выше заявленного размера. */
 function outlineOf(form, w, h) {
+  /* Каталог форм (листы 01–10, номера 1–60): контур задан в долях камня —
+     x от -0.5 до 0.5, y от 0 до 1. Переводим в метры и работаем как обычно. */
+  if (CATALOG[form]) {
+    return CATALOG[form].cmds.map((c) => {
+      if (c[0] === "Z") return c;
+      const out = [c[0]];
+      for (let i = 1; i < c.length; i += 2) {
+        out.push(c[i] * w, c[i + 1] * h);
+      }
+      return out;
+    });
+  }
+
   const hw = w / 2, ch = Math.min(hw * 0.5, 0.05), k = hw * 0.5523;
 
   if (form === "ark") {

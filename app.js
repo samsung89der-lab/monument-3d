@@ -3,7 +3,8 @@
    Ничего не считает сам: за размеры отвечает engine.js, за
    картинку — scene.mjs. Здесь только состояние и обвязка.
    ============================================================ */
-import { create, stoneSwatch, formOutline } from "./scene.mjs?v=9";
+import { create, stoneSwatch, formOutline } from "./scene.mjs?v=11";
+import { CATALOG } from "./forms.mjs?v=2";
 
 const CFG = window.MON_CFG;
 const E = window.ENGINE;
@@ -15,7 +16,9 @@ const els = {
   priceList: $("priceList"), totalSum: $("totalSum"), instLine: $("instLine"), priceNote: $("priceNote"),
   sendBtn: $("sendBtn"), copyBtn: $("copyBtn"), linkBtn: $("linkBtn"), formErr: $("formErr"), shareBox: $("shareBox"),
   tabs: $("tabs"),
-  presetChips: $("presetChips"), formChips: $("formChips"), sizeChips: $("sizeChips"),
+  presetChips: $("presetChips"), formDD: $("formDD"), formBtn: $("formBtn"),
+  formPanel: $("formPanel"), formSearch: $("formSearch"), formList: $("formList"), formHint: $("formHint"),
+  sizeChips: $("sizeChips"),
   sw: $("sw"), sh: $("sh"), sth: $("sth"), stoneChips: $("stoneChips"), sidesChips: $("sidesChips"),
   tumbaChips: $("tumbaChips"),
   efio: $("efio"), eyears: $("eyears"), eepitaph: $("eepitaph"),
@@ -113,9 +116,70 @@ function mark(host) {
 function pick(host, val) { host.dataset.val = val; mark(host); }
 
 chipSet(els.presetChips, CFG.presets, null, (id) => { S = E.applyPreset(S, id, CFG); });
-/* у форм рисуем силуэт: id формы — это id контура в scene.mjs */
+
+/* ---------------- выбор формы: выпадающий список с силаэтами ----------------
+   Свои формы из config.js плюс каталожные из forms.mjs (номера с листов
+   каталога форм). Каталог кладём в тот же список, чтобы цена, смета и проверка
+   состояния работали одинаково для любых форм. */
+Object.keys(CATALOG).forEach((id) => {
+  const c = CATALOG[id];
+  CFG.forms.push({ id: id, name: "\u2116 " + c.num + " \u00b7 " + c.name, k: c.k || 1.24, hint: c.hint });
+});
 CFG.forms.forEach((f) => { f.sil = f.id; });
-chipSet(els.formChips, CFG.forms, null, (id) => { S.stela.form = id; });
+const FORMS = CFG.forms;
+
+function formRow(it) {
+  const b = document.createElement("button");
+  b.type = "button";
+  b.dataset.id = it.id;
+  b.className = "dd-row" + (it.id === S.stela.form ? " on" : "");
+  b.innerHTML = silSvg(it.id) + '<span class="dd-t"><b>' + it.name + "</b>"
+    + (it.hint ? "<small>" + it.hint + "</small>" : "") + "</span>";
+  b.addEventListener("click", () => {
+    S.stela.form = it.id;
+    S = E.sanitize(S, CFG);
+    openFormList(false);
+    render();
+  });
+  return b;
+}
+function paintFormList() {
+  const q = (els.formSearch.value || "").trim().toLowerCase();
+  els.formList.innerHTML = "";
+  let shown = 0;
+  FORMS.forEach((it) => {
+    const text = (it.name + " " + (it.hint || "")).toLowerCase();
+    if (q && text.indexOf(q) < 0) return;
+    shown++;
+    els.formList.appendChild(formRow(it));
+  });
+  if (!shown) {
+    els.formList.innerHTML = '<div class="dd-none">Ничего не нашлось — попробуйте номер, например 17</div>';
+  }
+}
+function markForm() {
+  const it = FORMS.filter((x) => x.id === S.stela.form)[0] || FORMS[0];
+  els.formBtn.querySelector(".dd-sil").innerHTML = silSvg(it.id);
+  els.formBtn.querySelector(".dd-name").textContent = it.name;
+  els.formHint.textContent = it.hint || "";
+  Array.prototype.forEach.call(els.formList.children, (b) => {
+    b.classList.toggle("on", b.dataset.id === S.stela.form);
+  });
+}
+function openFormList(on) {
+  els.formPanel.hidden = !on;
+  els.formBtn.classList.toggle("open", on);
+  if (on) paintFormList();
+}
+els.formBtn.addEventListener("click", (e) => {
+  e.stopPropagation();
+  openFormList(els.formPanel.hidden);
+});
+els.formSearch.addEventListener("input", paintFormList);
+els.formSearch.addEventListener("click", (e) => e.stopPropagation());
+document.addEventListener("click", (e) => {
+  if (!els.formDD.contains(e.target)) openFormList(false);
+});
 chipSet(els.sizeChips, CFG.sizes, null, (id) => {
   const sz = E.find(CFG.sizes, id);
   if (sz) { S.stela.w = sz.w; S.stela.h = sz.h; S.stela.th = sz.th; }
@@ -434,7 +498,7 @@ function plotId() {
 }
 function render() {
   pick(els.presetChips, "");
-  pick(els.formChips, S.stela.form);
+  markForm();
   pick(els.sizeChips, sizeId());
   pick(els.stoneChips, S.stela.stone);
   pick(els.sidesChips, S.stela.sides);

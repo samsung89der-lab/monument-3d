@@ -72,6 +72,31 @@ body { background: var(--bg); color: var(--ink); font: 15px/1.5 "Segoe UI", syst
    растягивается на весь экран */
 .silgrid button small { display: none; font-size: 10.5px; line-height: 1.25; }
 .silgrid button.on small { display: block; }
+/* выбор формы: выпадающий список с силаэтами и поиском по номеру */
+.dd { position: relative; }
+.dd-btn { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left;
+  background: var(--panel); color: var(--ink); border: 1px solid var(--line);
+  border-radius: 9px; padding: 8px 12px; cursor: pointer; }
+.dd-btn.open { border-color: var(--gold); }
+.dd-btn .sil { width: 30px; height: 38px; flex: none; }
+.dd-name { flex: 1; font-weight: 600; font-size: 13.5px; }
+.dd-caret { color: var(--ink-soft); }
+.dd-panel { position: absolute; z-index: 40; left: 0; right: 0; top: calc(100% + 6px);
+  background: #1e2126; border: 1px solid var(--line); border-radius: 10px;
+  padding: 8px; box-shadow: 0 12px 28px rgba(0,0,0,.45); }
+.dd-search { width: 100%; box-sizing: border-box; margin-bottom: 8px; padding: 9px 10px;
+  border-radius: 8px; border: 1px solid var(--line); background: #14171a; color: var(--ink); }
+.dd-list { max-height: 46vh; overflow-y: auto; display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px; }
+.dd-row { display: flex; gap: 8px; align-items: center; text-align: left; padding: 6px 8px;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+  cursor: pointer; color: var(--ink); }
+.dd-row .sil { width: 26px; height: 32px; flex: none; }
+.dd-row b { display: block; font-size: 13px; }
+.dd-row small { display: block; color: var(--ink-soft); font-size: 11px; line-height: 1.25; }
+.dd-row.on { border-color: var(--gold); background: #3a3325; }
+.dd-row.on .sil path { fill: #6a5730; stroke: var(--gold); }
+.dd-none { padding: 10px; color: var(--ink-soft); font-size: 13px; }
 .stones { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 8px; }
 .stones button { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; color: var(--ink); text-align: left; padding: 9px; cursor: pointer; }
 .stones button b { display: block; font-size: 13px; }
